@@ -1,7 +1,34 @@
 import React, { useState } from 'react';
-import { Mail, Twitter, Linkedin, Github, Instagram, Phone, ExternalLink } from 'lucide-react';
+import { Mail, Twitter, Linkedin, Github, Instagram, Phone, ExternalLink, BarChart2 } from 'lucide-react'; // Added BarChart2
 import { useAuth } from '../hooks/useAuth';
+// Assuming useNotifications hook and its Notification type might be structured like this:
+// import { useNotifications, Notification as AppNotification } from '../hooks/useNotifications';
+
+// For the purpose of this example, let's define Notification type based on usage
+// Replace this with the actual import if available: import { Notification } from '../hooks/useNotifications';
+interface NotificationFromHook {
+  id: string;
+  type: string; // e.g., 'email', 'twitter', 'linkedin'
+  title: string;
+  timestamp: string | number | Date; // Allow for flexible timestamp types
+  avatar?: string;
+}
+
+// Mock implementation of useNotifications if not provided
+// const useNotifications = () => ({
+//   notifications: [
+//     { id: 'n1', type: 'email', title: 'New Email Received', timestamp: new Date().toISOString(), avatar: 'https://i.pravatar.cc/150?img=1' },
+//     { id: 'n2', type: 'twitter', title: 'You have a new follower', timestamp: new Date().toISOString(), avatar: 'https://i.pravatar.cc/150?img=2' },
+//     { id: 'n3', type: 'linkedin', title: 'Connection request', timestamp: new Date().toISOString(), avatar: 'https://i.pravatar.cc/150?img=3' },
+//     { id: 'n4', type: 'twitter', title: 'Your tweet was liked', timestamp: new Date().toISOString(), avatar: 'https://i.pravatar.cc/150?img=4' },
+//     { id: 'n5', type: 'email', title: 'Project Update', timestamp: new Date().toISOString(), avatar: 'https://i.pravatar.cc/150?img=5' },
+//     { id: 'n6', type: 'github', title: 'Issue assigned to you', timestamp: new Date().toISOString() },
+//   ] as NotificationFromHook[],
+// });
+// --- End of Mock ---
+// Make sure to import the actual useNotifications hook from your project
 import { useNotifications } from '../hooks/useNotifications';
+
 
 interface FeedItem {
   id: string;
@@ -16,9 +43,66 @@ interface FeedItem {
   shares: number;
 }
 
+interface NotificationsChartProps {
+  notifications: NotificationFromHook[];
+  getPlatformIcon: (platform: string) => JSX.Element | null;
+}
+
+const NotificationsChart: React.FC<NotificationsChartProps> = ({ notifications, getPlatformIcon }) => {
+  const countsByType = notifications.reduce((acc, notification) => {
+    acc[notification.type] = (acc[notification.type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const chartData = Object.entries(countsByType)
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count); // Sort by count descending
+
+  if (chartData.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+        No notification data to display in chart.
+      </div>
+    );
+  }
+
+  // Calculate max count for scaling bars, ensure it's at least 1 to prevent division by zero issues.
+  const maxCount = Math.max(...chartData.map(d => d.count), 1);
+
+  return (
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">
+        Notifications by Type
+      </h3>
+      <div className="space-y-3">
+        {chartData.map(({ type, count }) => (
+          <div key={type} className="flex items-center">
+            <div className="w-32 flex items-center text-sm text-gray-700 dark:text-gray-300 shrink-0">
+              <span className="mr-2 h-5 w-5 flex items-center justify-center">
+                {getPlatformIcon(type)}
+              </span>
+              <span className="capitalize">{type}</span>
+            </div>
+            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+              <div
+                className="bg-blue-600 dark:bg-blue-500 h-full rounded-full text-xs flex items-center justify-end text-white transition-all duration-500 ease-out"
+                style={{ width: `${(count / maxCount) * 100}%` }}
+                title={`${count} notifications`}
+              >
+                {count > 0 && <span className="px-2">{count}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { notifications } = useNotifications();
+  const { notifications } = useNotifications() as { notifications: NotificationFromHook[] }; // Cast if needed, or ensure hook provides typed data
   const [activeTab, setActiveTab] = useState('all');
 
   // Mock feed data
@@ -86,7 +170,7 @@ const Dashboard: React.FC = () => {
     : feedItems.filter(item => item.platform === activeTab);
 
   const getPlatformIcon = (platform: string) => {
-    const iconClass = "h-5 w-5";
+    const iconClass = "h-5 w-5"; // Consistent icon size for platform icons
     
     switch (platform) {
       case 'email':
@@ -101,8 +185,8 @@ const Dashboard: React.FC = () => {
         return <Instagram className={`${iconClass} text-pink-500`} />;
       case 'whatsapp':
         return <Phone className={`${iconClass} text-green-500`} />;
-      default:
-        return null;
+      default: // Fallback icon for unknown platforms
+        return <ExternalLink className={`${iconClass} text-gray-400`} />;
     }
   };
 
@@ -111,9 +195,9 @@ const Dashboard: React.FC = () => {
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Your Dashboard</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Main feed */}
+        {/* Main feed or Chart */}
         <div className="md:col-span-2 space-y-6">
-          <div className="card overflow-hidden">
+          <div className="card overflow-hidden"> {/* Assuming 'card' provides base styling like bg, shadow, rounded */}
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="flex -mb-px overflow-x-auto" aria-label="Tabs">
                 <button
@@ -176,90 +260,105 @@ const Dashboard: React.FC = () => {
                 >
                   <Mail className="h-4 w-4 mr-2" /> Email
                 </button>
+                {/* New Chart Tab */}
+                <button
+                  onClick={() => setActiveTab('chart')}
+                  className={`py-4 px-6 text-sm font-medium border-b-2 whitespace-nowrap flex items-center ${
+                    activeTab === 'chart'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <BarChart2 className="h-4 w-4 mr-2" /> Chart
+                </button>
               </nav>
             </div>
             
-            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredFeed.length === 0 ? (
-                <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-                  No activity found for this platform
-                </div>
-              ) : (
-                filteredFeed.map((item) => (
-                  <div key={item.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <div className="flex space-x-3">
-                      <div className="flex-shrink-0">
-                        {item.authorAvatar ? (
-                          <img
-                            src={item.authorAvatar}
-                            alt={item.author}
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            {getPlatformIcon(item.platform)}
+            {activeTab === 'chart' ? (
+              <NotificationsChart notifications={notifications} getPlatformIcon={getPlatformIcon} />
+            ) : (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredFeed.length === 0 ? (
+                  <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                    No activity found for this platform.
+                  </div>
+                ) : (
+                  filteredFeed.map((item) => (
+                    <div key={item.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <div className="flex space-x-3">
+                        <div className="flex-shrink-0">
+                          {item.authorAvatar ? (
+                            <img
+                              src={item.authorAvatar}
+                              alt={item.author}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                              {getPlatformIcon(item.platform)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {item.author}
+                              </p>
+                              <span className="mx-1 text-gray-500 dark:text-gray-400">•</span>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {item.timestamp}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {getPlatformIcon(item.platform)}
+                              <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                <ExternalLink size={16} />
+                              </button>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {item.author}
-                            </p>
-                            <span className="mx-1 text-gray-500 dark:text-gray-400">•</span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {item.timestamp}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {getPlatformIcon(item.platform)}
-                            <button className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                              <ExternalLink size={16} />
+                          <p className="text-sm text-gray-800 dark:text-gray-200 mb-3">
+                            {item.content}
+                          </p>
+                          
+                          {item.image && (
+                            <div className="mb-3 rounded-lg overflow-hidden">
+                              <img 
+                                src={item.image} 
+                                alt="Post image" 
+                                className="w-full h-auto object-cover"
+                                style={{ maxHeight: '300px' }}
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                            <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                              <span>{item.likes}</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                              </svg>
+                              <span>{item.comments}</span>
+                            </button>
+                            <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                              </svg>
+                              <span>{item.shares}</span>
                             </button>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-800 dark:text-gray-200 mb-3">
-                          {item.content}
-                        </p>
-                        
-                        {item.image && (
-                          <div className="mb-3 rounded-lg overflow-hidden">
-                            <img 
-                              src={item.image} 
-                              alt="Post image" 
-                              className="w-full h-auto object-cover"
-                              style={{ maxHeight: '300px' }}
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="flex space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                          <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <span>{item.likes}</span>
-                          </button>
-                          <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <span>{item.comments}</span>
-                          </button>
-                          <button className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-300">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                            <span>{item.shares}</span>
-                          </button>
-                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
         
@@ -288,7 +387,7 @@ const Dashboard: React.FC = () => {
                 Connected Accounts
               </h3>
               {/* <div className="space-y-3">
-                {user?.connectedAccounts.map((account) => (
+                {user?.connectedAccounts?.map((account) => ( // Added optional chaining for connectedAccounts
                   <div key={account.platform} className="flex items-center justify-between">
                     <div className="flex items-center">
                       {getPlatformIcon(account.platform)}
@@ -337,7 +436,8 @@ const Dashboard: React.FC = () => {
                       />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        {getPlatformIcon(notification.type)}
+                        {/* Use a smaller icon for sidebar notifications if needed, or keep consistent */}
+                        {getPlatformIcon(notification.type) && React.cloneElement(getPlatformIcon(notification.type) as React.ReactElement, { className: "h-4 w-4" })}
                       </div>
                     )}
                   </div>
@@ -351,6 +451,9 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
+               {notifications.length === 0 && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">No recent notifications.</p>
+              )}
             </div>
           </div>
           
