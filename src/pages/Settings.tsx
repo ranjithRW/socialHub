@@ -10,7 +10,6 @@ const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('account');
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [username, setUsername] = useState(user?.username || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
