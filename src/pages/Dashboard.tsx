@@ -100,7 +100,7 @@ const NotificationsChart: React.FC<NotificationsChartProps> = ({ notifications, 
             </div>
             <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
               <div
-                className="bg-pink-600 dark:bg-pink-500 h-full rounded-full text-xs flex items-center justify-end text-white transition-all duration-500 ease-out"
+                className="bg-pink-600 dark:bg-pink-500 h-full rounded-full text-xs flex items-center justify-end text-white transition-all duration-500 ease-out cursor-pointer"
                 style={{ width: `${(count / maxCount) * 100}%` }}
                 title={`${count} notifications`}
               >

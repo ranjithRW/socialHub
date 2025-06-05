@@ -60,13 +60,13 @@ const Sidebar: React.FC = () => {
         <div className="p-4 flex items-center justify-between relative">
           {!isCollapsed && (
             <div className="flex items-center">
-              <Layers className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+              <img src="/dashboard.png" alt="Logo" className="h-6 w-6" />
               <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">Obito</span>
             </div>
           )}
           {isCollapsed && (
             <div className="mx-auto md:mx-0">
-              <Layers className="h-8 w-8 text-blue-600 dark:text-blue-500" />
+              <img src="/dashboard.png" alt="Logo" className="h-6 w-6" />
             </div>
           )}
           {/* Collapse Button */}
