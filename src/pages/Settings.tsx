@@ -243,7 +243,7 @@ const Settings: React.FC = () => {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="btn btn-primary"
+                      className="btn btn-primary flex items-center justify-center p-4"
                     >
                       {saving ? (
                         <>
