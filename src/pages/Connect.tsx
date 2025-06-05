@@ -152,7 +152,7 @@ const Connect: React.FC = () => {
               <button
                 onClick={() => handleConnect(platform.id)}
                 disabled={connecting === platform.id}
-                className="btn btn-primary w-full"
+                className="btn btn-primary w-full flex items-center justify-center"
               >
                 {connecting === platform.id ? (
                   <>

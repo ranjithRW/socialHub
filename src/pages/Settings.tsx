@@ -6,21 +6,22 @@ import { useAuth } from '../hooks/useAuth';
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
-  
+
   const [activeTab, setActiveTab] = useState('account');
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [username, setUsername] = useState(user?.username || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     setSaving(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setSaving(false);
       setSaved(true);
-      
+
       setTimeout(() => {
         setSaved(false);
       }, 2000);
@@ -43,33 +44,30 @@ const Settings: React.FC = () => {
             <nav className="p-4 md:p-6 space-y-1">
               <button
                 onClick={() => setActiveTab('account')}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
-                  activeTab === 'account'
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'account'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
                 <User className="mr-3 h-5 w-5 flex-shrink-0" />
                 Account
               </button>
               <button
                 onClick={() => setActiveTab('notifications')}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
-                  activeTab === 'notifications'
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'notifications'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
                 <Bell className="mr-3 h-5 w-5 flex-shrink-0" />
                 Notifications
               </button>
               <button
                 onClick={() => setActiveTab('appearance')}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
-                  activeTab === 'appearance'
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'appearance'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
                 {theme === 'dark' ? (
                   <Moon className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -80,11 +78,10 @@ const Settings: React.FC = () => {
               </button>
               <button
                 onClick={() => setActiveTab('security')}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
-                  activeTab === 'security'
-                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'security'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
                 <Shield className="mr-3 h-5 w-5 flex-shrink-0" />
                 Security
@@ -97,7 +94,7 @@ const Settings: React.FC = () => {
             {activeTab === 'account' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-medium text-gray-900 dark:text-white">Account Information</h2>
-                
+
                 <div className="flex items-center mb-6">
                   <img
                     src={user?.avatar || 'https://i.pravatar.cc/150?img=68'}
@@ -105,15 +102,12 @@ const Settings: React.FC = () => {
                     className="h-20 w-20 rounded-full object-cover"
                   />
                   <div className="ml-4">
-                    <button className="btn btn-outline text-sm">
-                      Change avatar
-                    </button>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      JPG, GIF or PNG. 1MB max.
-                    </p>
+                    {user?.name && (
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</h3>
+                    )}
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -128,12 +122,13 @@ const Settings: React.FC = () => {
                         name="name"
                         type="text"
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        // onChange={(e) => setName(e.target.value)}
                         className="input pl-10"
+                        readOnly
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email
@@ -147,17 +142,18 @@ const Settings: React.FC = () => {
                         name="email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        // onChange={(e) => setEmail(e.target.value)}
                         className="input pl-10"
+                        readOnly
                       />
                     </div>
                   </div>
-                  
-                  <div className="pt-4">
+
+                  {/* <div className="pt-4">
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="btn btn-primary"
+                      className="btn btn-primary flex items-center justify-center"
                     >
                       {saving ? (
                         <>
@@ -179,15 +175,15 @@ const Settings: React.FC = () => {
                         </>
                       )}
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'notifications' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-medium text-gray-900 dark:text-white">Notification Preferences</h2>
-                
+
                 <div className="space-y-4">
                   <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Email Notifications</h3>
@@ -202,7 +198,7 @@ const Settings: React.FC = () => {
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">New messages</p>
@@ -213,7 +209,7 @@ const Settings: React.FC = () => {
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Platform updates</p>
@@ -226,7 +222,7 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Push Notifications</h3>
                     <div className="space-y-3">
@@ -242,7 +238,7 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4">
                     <button
                       onClick={handleSave}
@@ -273,22 +269,21 @@ const Settings: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'appearance' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-medium text-gray-900 dark:text-white">Appearance</h2>
-                
+
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Theme</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div
                         onClick={() => theme === 'dark' && toggleTheme()}
-                        className={`rounded-lg p-4 border-2 flex flex-col items-center cursor-pointer ${
-                          theme === 'light'
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 dark:border-gray-700'
-                        }`}
+                        className={`rounded-lg p-4 border-2 flex flex-col items-center cursor-pointer ${theme === 'light'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-700'
+                          }`}
                       >
                         <div className="w-full h-24 rounded-md bg-white border border-gray-200 mb-2 flex flex-col p-2">
                           <div className="w-full h-4 rounded-sm bg-gray-100 mb-1"></div>
@@ -305,14 +300,13 @@ const Settings: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div
                         onClick={() => theme === 'light' && toggleTheme()}
-                        className={`rounded-lg p-4 border-2 flex flex-col items-center cursor-pointer ${
-                          theme === 'dark'
-                            ? 'border-blue-500 bg-blue-900/10'
-                            : 'border-gray-200 dark:border-gray-700'
-                        }`}
+                        className={`rounded-lg p-4 border-2 flex flex-col items-center cursor-pointer ${theme === 'dark'
+                          ? 'border-blue-500 bg-blue-900/10'
+                          : 'border-gray-200 dark:border-gray-700'
+                          }`}
                       >
                         <div className="w-full h-24 rounded-md bg-gray-800 border border-gray-700 mb-2 flex flex-col p-2">
                           <div className="w-full h-4 rounded-sm bg-gray-700 mb-1"></div>
@@ -331,7 +325,7 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Your theme preference will be saved automatically and applied across all your devices when you're signed in.
@@ -340,11 +334,11 @@ const Settings: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'security' && (
               <div className="space-y-6">
                 <h2 className="text-xl font-medium text-gray-900 dark:text-white">Security Settings</h2>
-                
+
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Change Password</h3>
@@ -366,7 +360,7 @@ const Settings: React.FC = () => {
                           />
                         </div>
                       </div>
-                      
+
                       <div>
                         <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                           New Password
@@ -384,7 +378,7 @@ const Settings: React.FC = () => {
                           />
                         </div>
                       </div>
-                      
+
                       <div>
                         <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                           Confirm New Password
@@ -404,7 +398,7 @@ const Settings: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Two-Factor Authentication</h3>
                     <div className="flex items-center justify-between">
@@ -418,7 +412,7 @@ const Settings: React.FC = () => {
                       </label>
                     </div>
                   </div>
-                  
+
                   <div className="pt-4">
                     <button
                       onClick={handleSave}
